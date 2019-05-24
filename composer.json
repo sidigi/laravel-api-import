@@ -23,5 +23,12 @@
         "psr-4": {
             "sidigi\\LaravelApiImport\\Tests\\": "tests/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "sidigi\\LaravelApiImport\\LaravelApiImportServiceProvider"
+            ]
+        }
     }
 }
