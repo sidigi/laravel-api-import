@@ -14,12 +14,12 @@ class LaravelApiImportServiceProvider extends ServiceProvider
         }
     }
 
-    public function register()
+    public function register(): void
     {
 
     }
 
-    protected function registerPublishing()
+    protected function registerPublishing(): void
     {
         $this->publishes([
             __DIR__ . '/../config/laravel-api-import.php' => config_path('laravel-api-import.php')
