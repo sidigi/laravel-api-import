@@ -1,0 +1,15 @@
+{
+    "name": "sidigi/laravel-api-import",
+    "description": "Import data from REST APIs",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mikulich Evgeny",
+            "email": "sidigicoder@gmail.com"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "orchestra/testbench": "^3.8"
+    }
+}
