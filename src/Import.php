@@ -16,7 +16,7 @@ class Import
     protected $mapper;
     protected $sleep;
 
-    /** @var Pager */
+    /** @var Paginator */
     protected $pager;
 
     private $response;
@@ -26,7 +26,7 @@ class Import
     public function __construct()
     {
         $this->client = new Client();
-        $this->pager = new Pager();
+        $this->pager = new Paginator();
     }
 
     public static function fromRequest(Closure $callback): self
@@ -53,7 +53,7 @@ class Import
         return $this;
     }
 
-    public function withPager(Pager $pager): self
+    public function withPager(Paginator $pager): self
     {
         $this->pager = $pager;
 
@@ -113,7 +113,7 @@ class Import
 
         $this->response = $this->client->get($this->pager->url(), $this->headers);
 
-        if ($this->pager->nextUrl()){
+        if ($this->pager->hasNextPage()){
             $this->pager->next();
         }
     }
@@ -139,6 +139,6 @@ class Import
 
     public function hasNextPage(): bool
     {
-        return (bool) $this->pager->nextUrl() && (bool) $this->getParsedResponse();
+        return $this->pager->hasNextPage() && (bool) $this->getParsedResponse();
     }
 }

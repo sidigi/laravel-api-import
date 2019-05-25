@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace sidigi\LaravelApiImport;
 
-class Pager
+class Paginator
 {
     protected $page;
     protected $start;
@@ -27,6 +27,11 @@ class Pager
         $obj->setUrl($url);
 
         return $obj;
+    }
+
+    public function hasNextPage(): bool
+    {
+        return ! (! $this->page && ! $this->start);
     }
 
     private function prepare(string $url): string
@@ -56,10 +61,6 @@ class Pager
 
     public function nextUrl(): ?string
     {
-        if (!$this->page && !$this->start){
-            return null;
-        }
-
         $parts = explode('?', $this->url);
         $params = [];
 

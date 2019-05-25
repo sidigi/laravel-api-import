@@ -33,7 +33,7 @@ class ImportEntity extends Import
 
     protected function pageRegister(): void
     {
-        $this->page(function (){
+        $this->page(function(){
             $this->eachPage($this->getResponse());
         });
     }
