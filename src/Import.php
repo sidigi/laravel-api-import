@@ -9,14 +9,21 @@ use GuzzleHttp\Psr7\Response;
 
 class Import
 {
-    private $headers = [];
-    private $response;
-    private $callbacks = [];
-    private $client;
-    private $itemsKey = 'data';
+    protected $headers = [];
+    protected $requestCallback;
+    protected $client;
+    protected $itemsKey = 'data';
+    protected $mapper;
+    protected $sleep;
 
+    /** @var EntityMapInterface */
+    protected $map;
     /** @var Pager */
-    private $pager;
+    protected $pager;
+
+    private $response;
+    private $pageCallbacks = [];
+    private $eachCallbacks = [];
 
     public function __construct()
     {
@@ -27,7 +34,7 @@ class Import
     public static function fromRequest(Closure $callback): self
     {
         $obj = new self();
-        $obj->callbacks['request'] = $callback;
+        $obj->requestCallback = $callback;
 
         return $obj;
     }
@@ -57,57 +64,59 @@ class Import
 
     public function fire(): void
     {
-        $this->makeRequest();
-
         do {
+            $this->makeRequest();
+
             $response = $this->getParsedResponse();
 
             $items = $this->getItemsFromResponseByKey($response, $this->itemsKey);
 
-            if (isset($this->callbacks['page']) && is_callable($this->callbacks['page'])){
-                $this->callbacks['page']($this->getResponse());
+            foreach ($this->pageCallbacks as $callback){
+                if (is_callable($callback)){
+                    $callback($this->getResponse());
+                }
             }
 
-            if (isset($this->callbacks['each']) && is_callable($this->callbacks['each'])){
-                collect($items)->each(function ($item) use ($response) {
-                    $this->callbacks['each']($item, $response);
-                });
+            foreach ($this->eachCallbacks as $callback){
+                if (is_callable($callback)){
+                    collect($items)->each(static function ($item) use ($response, $callback) {
+                        $callback($item, $response);
+                    });
+                }
             }
 
-            $this->makeNextRequest();
+            if ($this->sleep){
+                sleep($this->sleep);
+            }
 
-        } while($this->hasNextPage());
+        } while ( $this->hasNextPage() );
     }
 
     public function each(Closure $callback): self
     {
-        $this->callbacks['each'] = $callback;
+        $this->eachCallbacks[] = $callback;
 
         return $this;
     }
 
     public function page(Closure $callback): self
     {
-        $this->callbacks['page'] = $callback;
+        $this->pageCallbacks[] = $callback;
 
         return $this;
     }
 
     public function makeRequest(): void
     {
-        if (isset($this->callbacks['request']) && is_callable($this->callbacks['request'])){
-            $this->response = call_user_func($this->callbacks['request'], $this->client);
+        if (is_callable($this->requestCallback)){
+            $this->response = call_user_func($this->requestCallback, $this->client);
             return;
         }
 
         $this->response = $this->client->get($this->pager->url(), $this->headers);
-    }
 
-    public function makeNextRequest(): void
-    {
         if ($this->pager->nextUrl()){
             $this->pager->next();
-            $this->makeRequest();
         }
     }
 

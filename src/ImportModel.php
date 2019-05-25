@@ -49,34 +49,28 @@ class ImportModel extends ImportEntity
 
     protected function eachRegister(): void
     {
-        if (isset($this->callbacks['each']) && is_callable($this->callbacks['each'])){
-            $this->import->each($this->callbacks['each']);
-            return;
-        }
-
-        $this->import->each(function ($itemRaw, $response){
+        $this->each(function ($itemRaw, $response){
             $result = null;
 
             $item = $this->map->modifyFields($itemRaw);
             $model = $this->getFilled($item);
 
-            $this->eachRow($itemRaw, $response);
+            $result = $this->eachItem($itemRaw, $response);
 
             if ($result !== false && $this->save($model, $itemRaw) !== false && $this->needDeleteRecordsNotInResponse()){
                 $this->allowedIds[] = $model->{$model->getKeyName()};
             }
         });
-
-    }
-
-    private function fill(Model $model, array $fields): Model
-    {
-        return (new EloquentDataMapper($fields, $model))->get();
     }
 
     protected function save(Model $model, array $item): void
     {
         $model->save();
+    }
+
+    private function fill(Model $model, array $fields): Model
+    {
+        return (new EloquentDataMapper($fields, $model))->get();
     }
 
     private function needTruncate()
