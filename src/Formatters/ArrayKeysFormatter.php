@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace sidigi\LaravelApiImport\Modificators;
+namespace sidigi\LaravelApiImport\Formatters;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use stdClass;
 
-class KeysModificator implements ModificatorInterface
+class ArrayKeysFormatter implements ModificatorInterface
 {
     private $data;
 

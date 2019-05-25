@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace sidigi\LaravelApiImport\Modificators;
+namespace sidigi\LaravelApiImport\Formatters;
 
 interface ModificatorInterface
 {

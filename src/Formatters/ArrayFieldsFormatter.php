@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace sidigi\LaravelApiImport\Modificators;
+namespace sidigi\LaravelApiImport\Formatters;
 
-class FieldsModificator implements ModificatorInterface
+class ArrayFieldsFormatter implements ModificatorInterface
 {
     protected $only;
     protected $except;
@@ -33,7 +33,7 @@ class FieldsModificator implements ModificatorInterface
 
     public function get(): array
     {
-        $data = new KeysModificator($this->fields);
+        $data = new ArrayKeysFormatter($this->fields);
 
         if ($only = $this->only()){
             $data = $data->only($only);
