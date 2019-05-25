@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace sidigi\LaravelApiImport;
+namespace sidigi\LaravelApiImport\Modificators;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use stdClass;
 
-class FieldsDataMapper
+class KeysModificator implements ModificatorInterface
 {
     private $data;
 

@@ -1,13 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace sidigi\LaravelApiImport;
+namespace sidigi\LaravelApiImport\Modificators;
 
-class Mapper implements EntityMapInterface
+class FieldsModificator implements ModificatorInterface
 {
     protected $only;
     protected $except;
     protected $replace;
+
+    private $fields;
+
+    public function __construct(array $fields)
+    {
+        $this->fields = $fields;
+    }
 
     public function only(): ?array
     {
@@ -24,9 +31,9 @@ class Mapper implements EntityMapInterface
         return $this->replace;
     }
 
-    public function modifyFields(array $fields): array
+    public function get(): array
     {
-        $data = new FieldsDataMapper($fields);
+        $data = new KeysModificator($this->fields);
 
         if ($only = $this->only()){
             $data = $data->only($only);

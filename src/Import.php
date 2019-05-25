@@ -16,8 +16,6 @@ class Import
     protected $mapper;
     protected $sleep;
 
-    /** @var EntityMapInterface */
-    protected $map;
     /** @var Pager */
     protected $pager;
 

@@ -52,7 +52,12 @@ class ImportModel extends ImportEntity
         $this->each(function ($itemRaw, $response){
             $result = null;
 
-            $item = $this->map->modifyFields($itemRaw);
+            $item = $itemRaw;
+
+            if ($this->mapper){
+                $item = (new $this->mapper($item))->get();
+            }
+
             $model = $this->getFilled($item);
 
             $result = $this->eachItem($itemRaw, $response);

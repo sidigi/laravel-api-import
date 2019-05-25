@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace sidigi\LaravelApiImport;
 
-use Closure;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 
@@ -21,10 +20,6 @@ class ImportEntity extends Import
 
         if ($url = $this->url()){
             $this->pager->setUrl($url);
-        }
-
-        if ($this->mapper){
-            $this->map = new $this->mapper;
         }
     }
 
@@ -46,8 +41,8 @@ class ImportEntity extends Import
     protected function eachRegister(): void
     {
         $this->each(function ($item, $response){
-            if ($this->map){
-                $item = $this->map->modifyFields($item);
+            if ($this->mapper){
+                $item = (new $this->mapper($item))->get();
             }
 
             $this->eachItem($item, $response);
