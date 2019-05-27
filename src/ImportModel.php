@@ -50,13 +50,7 @@ class ImportModel extends ImportEntity
     protected function eachRegister(): void
     {
         $this->each(function ($item){
-            $result = null;
-
-            if ($this->mapper){
-                $item = (new $this->mapper($item))->get();
-            }
-
-            $result = $this->eachItem($item);
+            $result = $this->eachItem($this->formatItem($item));
 
             if ($result === false){
                 return;

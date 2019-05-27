@@ -5,14 +5,19 @@ namespace sidigi\LaravelApiImport;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+use sidigi\LaravelApiImport\Exceptions\InvalidFormatterClassException;
+use sidigi\LaravelApiImport\Formatters\FormatterInterface;
 
 class ImportEntity extends Import
 {
     protected $url;
+    protected $formatters = [];
 
     public function __construct()
     {
         parent::__construct();
+
+        $this->formatters = $this->formatters();
 
         /*$this->requestCallback = function(Client $client){
             return $this->request($client);
@@ -41,10 +46,7 @@ class ImportEntity extends Import
     protected function eachRegister(): void
     {
         $this->each(function ($item){
-            if ($this->mapper){
-                $item = (new $this->mapper($item))->get();
-            }
-
+            $item = $this->formatItem($item);
             $this->eachItem($item);
         });
     }
@@ -71,5 +73,35 @@ class ImportEntity extends Import
     protected function eachPage(Response $response): void
     {
 
+    }
+
+    /**
+     * @param array $item
+     * @return array
+     * @throws InvalidFormatterClassException
+     */
+    protected function formatItem(array $item): array
+    {
+        foreach ($this->formatters as $formatter){
+            /** @var FormatterInterface $formatterObj */
+            $formatterObj = new $formatter($item);
+
+            if (! $formatterObj instanceof FormatterInterface){
+                throw new InvalidFormatterClassException('Formatter class must be of the type ' . FormatterInterface::class . ', '.get_class($formatterObj).' given');
+            }
+
+            $item = $formatterObj->get();
+        }
+
+        return $item;
+    }
+
+    protected function formatters()
+    {
+        return array_merge(
+            config('laravel-api-import.formatters') ?? [],
+            $this->formatters,
+            config('laravel-api-import.entities.' . static::class . '.formatters') ?? []
+        );
     }
 }

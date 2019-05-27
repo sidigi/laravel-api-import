@@ -7,7 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use stdClass;
 
-class ArrayKeysFormatter implements ModificatorInterface
+class ArrayKeysFormatter implements FormatterInterface
 {
     private $data;
 
