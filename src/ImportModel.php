@@ -49,28 +49,40 @@ class ImportModel extends ImportEntity
 
     protected function eachRegister(): void
     {
-        $this->each(function ($itemRaw, $response){
+        $this->each(function ($item){
             $result = null;
-
-            $item = $itemRaw;
 
             if ($this->mapper){
                 $item = (new $this->mapper($item))->get();
             }
 
+            $result = $this->eachItem($item);
+
+            if ($result === false){
+                return;
+            };
+
+            if (is_array($result)){
+                $item = $result;
+            }
+
             $model = $this->getFilled($item);
 
-            $result = $this->eachItem($itemRaw, $response);
+            if ($this->saving($model, $item) === false){
+                return;
+            }
 
-            if ($result !== false && $this->save($model, $itemRaw) !== false && $this->needDeleteRecordsNotInResponse()){
+            $model->save();
+
+            if ($this->needDeleteRecordsNotInResponse()){
                 $this->allowedIds[] = $model->{$model->getKeyName()};
             }
         });
     }
 
-    protected function save(Model $model, array $item): void
+    protected function saving(Model $model, array $item)
     {
-        $model->save();
+
     }
 
     private function fill(Model $model, array $fields): Model

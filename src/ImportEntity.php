@@ -40,12 +40,12 @@ class ImportEntity extends Import
 
     protected function eachRegister(): void
     {
-        $this->each(function ($item, $response){
+        $this->each(function ($item){
             if ($this->mapper){
                 $item = (new $this->mapper($item))->get();
             }
 
-            $this->eachItem($item, $response);
+            $this->eachItem($item);
         });
     }
 
@@ -59,7 +59,11 @@ class ImportEntity extends Import
         return $client->get($this->url());
     }
 
-    protected function eachItem(array $item, array $response): ?bool
+    /**
+     * @param array $item
+     * @return array|null|boolean
+     */
+    protected function eachItem(array $item)
     {
 
     }

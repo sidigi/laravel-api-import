@@ -6,6 +6,7 @@ namespace sidigi\LaravelApiImport;
 use Closure;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+use Illuminate\Support\Facades\DB;
 
 class Import
 {
@@ -62,32 +63,36 @@ class Import
 
     public function fire(): void
     {
-        do {
-            $this->makeRequest();
+        DB::beginTransaction();
 
-            $response = $this->getParsedResponse();
+            do {
+                $this->makeRequest();
 
-            $items = $this->getItemsFromResponseByKey($response, $this->itemsKey);
+                $response = $this->getParsedResponse();
 
-            foreach ($this->pageCallbacks as $callback){
-                if (is_callable($callback)){
-                    $callback($this->getResponse());
+                $items = $this->getItemsFromResponseByKey($response, $this->itemsKey);
+
+                foreach ($this->pageCallbacks as $callback){
+                    if (is_callable($callback)){
+                        $callback($this->getResponse());
+                    }
                 }
-            }
 
-            foreach ($this->eachCallbacks as $callback){
-                if (is_callable($callback)){
-                    collect($items)->each(static function ($item) use ($response, $callback) {
-                        $callback($item, $response);
-                    });
+                foreach ($this->eachCallbacks as $callback){
+                    if (is_callable($callback)){
+                        collect($items)->each(static function ($item) use ($callback) {
+                            $callback($item);
+                        });
+                    }
                 }
-            }
 
-            if ($this->sleep){
-                sleep($this->sleep);
-            }
+                if ($this->sleep){
+                    sleep($this->sleep);
+                }
 
-        } while ( $this->hasNextPage() );
+            } while ( $this->hasNextPage() );
+
+        DB::commit();
     }
 
     public function each(Closure $callback): self
