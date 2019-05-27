@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace sidigi\LaravelApiImport\Formatters;
 
-class ArrayFieldsFormatter implements ModificatorInterface
+class ArrayFieldsFormatter implements FormatterInterface
 {
     protected $only;
     protected $except;

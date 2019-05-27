@@ -14,7 +14,7 @@ class Import
     protected $requestCallback;
     protected $client;
     protected $itemsKey = 'data';
-    protected $mapper;
+    protected $formatters;
     protected $sleep;
 
     /** @var Paginator */
@@ -63,36 +63,36 @@ class Import
 
     public function fire(): void
     {
-        DB::beginTransaction();
+        do {
+            $this->makeRequest();
 
-            do {
-                $this->makeRequest();
+            $response = $this->getParsedResponse();
 
-                $response = $this->getParsedResponse();
+            $items = $this->getItemsFromResponseByKey($response, $this->itemsKey);
 
-                $items = $this->getItemsFromResponseByKey($response, $this->itemsKey);
-
-                foreach ($this->pageCallbacks as $callback){
-                    if (is_callable($callback)){
+            foreach ($this->pageCallbacks as $callback){
+                if (is_callable($callback)){
+                    DB::transaction(function () use ($callback){
                         $callback($this->getResponse());
-                    }
+                    });
                 }
+            }
 
-                foreach ($this->eachCallbacks as $callback){
-                    if (is_callable($callback)){
-                        collect($items)->each(static function ($item) use ($callback) {
+            foreach ($this->eachCallbacks as $callback){
+                if (is_callable($callback)){
+                    collect($items)->each(static function ($item) use ($callback) {
+                        DB::transaction(static function () use ($callback, $item){
                             $callback($item);
                         });
-                    }
+                    });
                 }
+            }
 
-                if ($this->sleep){
-                    sleep($this->sleep);
-                }
+            if ($this->sleep){
+                sleep($this->sleep);
+            }
 
-            } while ( $this->hasNextPage() );
-
-        DB::commit();
+        } while ( $this->hasNextPage() );
     }
 
     public function each(Closure $callback): self

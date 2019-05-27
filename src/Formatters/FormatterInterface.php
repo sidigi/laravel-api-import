@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace sidigi\LaravelApiImport\Formatters;
 
-interface ModificatorInterface
+interface FormatterInterface
 {
     public function get(): array;
 }
