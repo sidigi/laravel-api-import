@@ -6,7 +6,7 @@ namespace sidigi\LaravelApiImport;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 use sidigi\LaravelApiImport\Exceptions\InvalidFormatterClassException;
-use sidigi\LaravelApiImport\Formatters\FormatterInterface;
+use sidigi\LaravelApiImport\Modifiers\ModifierInterface;
 
 class ImportEntity extends Import
 {
@@ -83,11 +83,11 @@ class ImportEntity extends Import
     protected function formatItem(array $item): array
     {
         foreach ($this->formatters as $formatter){
-            /** @var FormatterInterface $formatterObj */
+            /** @var ModifierInterface $formatterObj */
             $formatterObj = new $formatter($item);
 
-            if (! $formatterObj instanceof FormatterInterface){
-                throw new InvalidFormatterClassException('Formatter class must be of the type ' . FormatterInterface::class . ', '.get_class($formatterObj).' given');
+            if (! $formatterObj instanceof ModifierInterface){
+                throw new InvalidFormatterClassException('Formatter class must be of the type ' . ModifierInterface::class . ', '.get_class($formatterObj).' given');
             }
 
             $item = $formatterObj->get();
