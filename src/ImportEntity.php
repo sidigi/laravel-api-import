@@ -19,8 +19,6 @@ class ImportEntity extends Import
     {
         parent::__construct();
 
-        $this->modifiers = $this->modifiers();
-
         /*$this->requestCallback = function(Client $client){
             return $this->request($client);
         };*/
@@ -81,7 +79,7 @@ class ImportEntity extends Import
      */
     protected function modifyItem(array $item): array
     {
-        foreach ($this->modifiers as $modifier){
+        foreach ($this->modifiers() as $modifier){
             /** @var ModifierInterface $formatterObj */
             $formatterObj = app()->make($modifier);
 
@@ -95,7 +93,7 @@ class ImportEntity extends Import
         return $item;
     }
 
-    protected function modifiers()
+    protected function modifiers(): array
     {
         if ($this->modifiers) {
             return $this->modifiers;
@@ -108,5 +106,7 @@ class ImportEntity extends Import
         if ($commonModifiers = config('laravel-api-import.modifiers') ?? []) {
             return $entityModifiers;
         }
+
+        return [];
     }
 }

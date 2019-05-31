@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace sidigi\LaravelApiImport;
 
 use Illuminate\Database\Eloquent\Model;
+use sidigi\LaravelApiImport\Mappers\EloquentDataMapper;
 
 class ImportModel extends ImportEntity
 {
@@ -81,7 +82,7 @@ class ImportModel extends ImportEntity
 
     private function fill(Model $model, array $fields): Model
     {
-        return (new EloquentDataMapper($fields, $model))->get();
+        return app()->make(EloquentDataMapper::class)->fill($model, $fields);
     }
 
     private function needTruncate()
