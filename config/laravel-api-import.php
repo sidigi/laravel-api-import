@@ -2,8 +2,8 @@
 declare(strict_types=1);
 
 return [
-    'formatters' => [
-        \sidigi\LaravelApiImport\Modifiers\ArrayFieldsModifier::class,
+    'modifiers' => [
+        \sidigi\LaravelApiImport\Modifiers\FieldsModifier::class
     ],
 
     'entities' => [

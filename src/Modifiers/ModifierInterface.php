@@ -5,5 +5,5 @@ namespace sidigi\LaravelApiImport\Modifiers;
 
 interface ModifierInterface
 {
-    public function get(): array;
+    public function modify(array $data): array;
 }

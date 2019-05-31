@@ -5,19 +5,21 @@ namespace sidigi\LaravelApiImport;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use sidigi\LaravelApiImport\Exceptions\InvalidFormatterClassException;
 use sidigi\LaravelApiImport\Modifiers\ModifierInterface;
 
 class ImportEntity extends Import
 {
     protected $url;
-    protected $formatters = [];
+    protected $modifiers = [];
 
     public function __construct()
     {
         parent::__construct();
 
-        $this->formatters = $this->formatters();
+        $this->modifiers = $this->modifiers();
 
         /*$this->requestCallback = function(Client $client){
             return $this->request($client);
@@ -46,7 +48,7 @@ class ImportEntity extends Import
     protected function eachRegister(): void
     {
         $this->each(function ($item){
-            $item = $this->formatItem($item);
+            $item = $this->modifyItem($item);
             $this->eachItem($item);
         });
     }
@@ -61,10 +63,6 @@ class ImportEntity extends Import
         return $client->get($this->url());
     }
 
-    /**
-     * @param array $item
-     * @return array|null|boolean
-     */
     protected function eachItem(array $item)
     {
 
@@ -79,29 +77,36 @@ class ImportEntity extends Import
      * @param array $item
      * @return array
      * @throws InvalidFormatterClassException
+     * @throws BindingResolutionException
      */
-    protected function formatItem(array $item): array
+    protected function modifyItem(array $item): array
     {
-        foreach ($this->formatters as $formatter){
+        foreach ($this->modifiers as $modifier){
             /** @var ModifierInterface $formatterObj */
-            $formatterObj = new $formatter($item);
+            $formatterObj = app()->make($modifier);
 
             if (! $formatterObj instanceof ModifierInterface){
                 throw new InvalidFormatterClassException('Formatter class must be of the type ' . ModifierInterface::class . ', '.get_class($formatterObj).' given');
             }
 
-            $item = $formatterObj->get();
+            $item = $formatterObj->modify($item);
         }
 
         return $item;
     }
 
-    protected function formatters()
+    protected function modifiers()
     {
-        return array_merge(
-            config('laravel-api-import.formatters') ?? [],
-            $this->formatters,
-            config('laravel-api-import.entities.' . static::class . '.formatters') ?? []
-        );
+        if ($this->modifiers) {
+            return $this->modifiers;
+        }
+
+        if ($entityModifiers = config('laravel-api-import.entities.' . static::class . '.modifiers') ?? []) {
+            return $entityModifiers;
+        }
+
+        if ($commonModifiers = config('laravel-api-import.modifiers') ?? []) {
+            return $entityModifiers;
+        }
     }
 }

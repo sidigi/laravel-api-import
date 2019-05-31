@@ -50,7 +50,7 @@ class ImportModel extends ImportEntity
     protected function eachRegister(): void
     {
         $this->each(function ($item){
-            $result = $this->eachItem($this->formatItem($item));
+            $result = $this->eachItem($this->modifyItem($item));
 
             if ($result === false){
                 return;

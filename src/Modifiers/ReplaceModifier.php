@@ -5,53 +5,25 @@ namespace sidigi\LaravelApiImport\Modifiers;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use stdClass;
 
-class ArrayKeysModifier implements ModifierInterface
+class ReplaceModifier implements ModifierInterface
 {
-    private $data;
+    private $keys;
+    private $rawData;
 
-    public function __construct(array $data = [])
+    public function __construct($keys)
     {
-        $this->data = $data;
+        $this->keys = is_array($keys) ? $keys : func_get_args();
     }
 
-    public function except($keys): self
+    public function modify(array $data): array
     {
-        $keys = is_array($keys) ? $keys : func_get_args();
+        $this->rawData = $data;
 
-        $results = $this->data;
-
-        Arr::forget($results, $keys);
-
-        return new self($results);
-    }
-
-    public function only($keys): self
-    {
-        $results = [];
-
-        $input = $this->data;
-
-        $placeholder = new stdClass;
-
-        foreach (is_array($keys) ? $keys : func_get_args() as $key) {
-            $value = data_get($input, $key, $placeholder);
-
-            if ($value !== $placeholder) {
-                Arr::set($results, $key, $value);
-            }
-        }
-
-        return new self($results);
-    }
-
-    public function replace(array $keys): self
-    {
-        $keys = Arr::dot($keys);
+        $keys = Arr::dot($this->keys);
         ksort($keys);
 
-        $data = Arr::dot($this->data);
+        $data = Arr::dot($data);
 
         foreach (array_reverse($keys) as $key => $value){
             foreach ($this->getReplacedKeys($key, $keys, $data) as $oldVal => $newVal){
@@ -64,12 +36,7 @@ class ArrayKeysModifier implements ModifierInterface
             Arr::set($array, $key, $value);
         }
 
-        return new self($array);
-    }
-
-    public function get(): array
-    {
-        return $this->data;
+        return $data;
     }
 
     private function getReplacedKeys(string $key, array $keys, array &$data): array
@@ -86,7 +53,7 @@ class ArrayKeysModifier implements ModifierInterface
             $newKeys[$key] = $keys[$key];
         }
 
-        if (! is_array(Arr::get($this->data, $key))){
+        if (! is_array(Arr::get($this->rawData, $key))){
             return $newKeys;
         }
 

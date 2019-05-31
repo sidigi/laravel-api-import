@@ -14,7 +14,7 @@ class Import
     protected $requestCallback;
     protected $client;
     protected $itemsKey = 'data';
-    protected $formatters;
+    protected $modifiers;
     protected $sleep;
 
     /** @var Paginator */
