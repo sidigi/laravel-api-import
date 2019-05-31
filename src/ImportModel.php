@@ -12,6 +12,7 @@ class ImportModel extends ImportEntity
     protected $allowedIds = [];
 
     protected $model;
+    protected $modelDataMapper = EloquentDataMapper::class;
     protected $flags = [];
 
     public function fire(): void
@@ -82,7 +83,7 @@ class ImportModel extends ImportEntity
 
     private function fill(Model $model, array $fields): Model
     {
-        return app()->make(EloquentDataMapper::class)->fill($model, $fields);
+        return app()->make($this->modelDataMapper)->fill($model, $fields);
     }
 
     private function needTruncate()
