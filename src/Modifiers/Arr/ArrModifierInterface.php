@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace sidigi\LaravelApiImport\Modifiers;
+namespace sidigi\LaravelApiImport\Modifiers\Arr;
 
-interface ModifierInterface
+interface ArrModifierInterface
 {
     public function modify(array $data): array;
 }

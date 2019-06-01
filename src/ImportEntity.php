@@ -5,15 +5,15 @@ namespace sidigi\LaravelApiImport;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use sidigi\LaravelApiImport\Exceptions\InvalidFormatterClassException;
-use sidigi\LaravelApiImport\Modifiers\ModifierInterface;
+use sidigi\LaravelApiImport\Modifiers\Arr\ArrModifierInterface;
+use sidigi\LaravelApiImport\Modifiers\Value\ValueModifierInterface;
 
 class ImportEntity extends Import
 {
     protected $url;
-    protected $modifiers = [];
+
+    /** @var Modifier  */
+    protected $modifier;
 
     public function __construct()
     {
@@ -26,6 +26,8 @@ class ImportEntity extends Import
         if ($url = $this->url()){
             $this->pager->setUrl($url);
         }
+
+        $this->modifier = new Modifier();
     }
 
     public function fire(): void
@@ -71,42 +73,25 @@ class ImportEntity extends Import
 
     }
 
-    /**
-     * @param array $item
-     * @return array
-     * @throws InvalidFormatterClassException
-     * @throws BindingResolutionException
-     */
     protected function modifyItem(array $item): array
     {
-        foreach ($this->modifiers() as $modifier){
-            /** @var ModifierInterface $formatterObj */
-            $formatterObj = app()->make($modifier);
+        foreach ($this->modifier->availableModifiers($this,ArrModifierInterface::class) as $modifier){
+            $item = (new $modifier)->modify($item);
 
-            if (! $formatterObj instanceof ModifierInterface){
-                throw new InvalidFormatterClassException('Formatter class must be of the type ' . ModifierInterface::class . ', '.get_class($formatterObj).' given');
+            foreach ($item as $key => $value){
+                $item[$key] = $this->modifyValue($value);
             }
-
-            $item = $formatterObj->modify($item);
         }
 
         return $item;
     }
 
-    protected function modifiers(): array
+    protected function modifyValue($item)
     {
-        if ($this->modifiers) {
-            return $this->modifiers;
+        foreach ($this->modifier->availableModifiers($this, ValueModifierInterface::class) as $modifier){
+            $item = (new $modifier)->modify($item);
         }
 
-        if ($entityModifiers = config('laravel-api-import.entities.' . static::class . '.modifiers') ?? []) {
-            return $entityModifiers;
-        }
-
-        if ($commonModifiers = config('laravel-api-import.modifiers') ?? []) {
-            return $entityModifiers;
-        }
-
-        return [];
+        return $item;
     }
 }

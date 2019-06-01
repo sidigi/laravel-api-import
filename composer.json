@@ -28,7 +28,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "sidigi\\LaravelApiImport\\LaravelApiImportServiceProvider"
+                "sidigi\\LaravelApiImport\\ApiImportServiceProvider"
             ]
         }
     }

@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace sidigi\LaravelApiImport\Modifiers;
+namespace sidigi\LaravelApiImport\Modifiers\Arr;
 
 use Illuminate\Support\Arr;
 
-class ExceptModifier implements ModifierInterface
+class ExceptArrModifier implements ArrModifierInterface
 {
     private $keys;
 

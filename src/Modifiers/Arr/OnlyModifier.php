@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace sidigi\LaravelApiImport\Modifiers;
+namespace sidigi\LaravelApiImport\Modifiers\Arr;
 
 use Illuminate\Support\Arr;
 use stdClass;

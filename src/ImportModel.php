@@ -83,7 +83,7 @@ class ImportModel extends ImportEntity
 
     private function fill(Model $model, array $fields): Model
     {
-        return app()->make($this->modelDataMapper)->fill($model, $fields);
+        return (new $this->modelDataMapper())->fill($model, $fields);
     }
 
     private function needTruncate()

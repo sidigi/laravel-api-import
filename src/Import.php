@@ -61,32 +61,37 @@ class Import
         return $this;
     }
 
+    public function fireOnce(): void
+    {
+        $this->makeRequest();
+
+        $response = $this->getParsedResponse();
+
+        $items = $this->getItemsFromResponseByKey($response, $this->itemsKey);
+
+        foreach ($this->pageCallbacks as $callback){
+            if (is_callable($callback)){
+                DB::transaction(function () use ($callback){
+                    $callback($this->getResponse());
+                });
+            }
+        }
+
+        foreach ($this->eachCallbacks as $callback){
+            if (is_callable($callback)){
+                collect($items)->each(static function ($item) use ($callback) {
+                    DB::transaction(static function () use ($callback, $item){
+                        $callback($item);
+                    });
+                });
+            }
+        }
+    }
+
     public function fire(): void
     {
         do {
-            $this->makeRequest();
-
-            $response = $this->getParsedResponse();
-
-            $items = $this->getItemsFromResponseByKey($response, $this->itemsKey);
-
-            foreach ($this->pageCallbacks as $callback){
-                if (is_callable($callback)){
-                    DB::transaction(function () use ($callback){
-                        $callback($this->getResponse());
-                    });
-                }
-            }
-
-            foreach ($this->eachCallbacks as $callback){
-                if (is_callable($callback)){
-                    collect($items)->each(static function ($item) use ($callback) {
-                        DB::transaction(static function () use ($callback, $item){
-                            $callback($item);
-                        });
-                    });
-                }
-            }
+            $this->fireOnce();
 
             if ($this->sleep){
                 sleep($this->sleep);
@@ -111,6 +116,7 @@ class Import
 
     public function makeRequest(): void
     {
+        //TODO: save request
         if (is_callable($this->requestCallback)){
             $this->response = call_user_func($this->requestCallback, $this->client);
             return;
