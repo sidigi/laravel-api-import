@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace sidigi\LaravelApiImport\Formatters;
@@ -35,15 +36,15 @@ class ArrayFieldsFormatter implements ModificatorInterface
     {
         $data = new ArrayKeysFormatter($this->fields);
 
-        if ($only = $this->only()){
+        if ($only = $this->only()) {
             $data = $data->only($only);
         }
 
-        if ($except = $this->except()){
+        if ($except = $this->except()) {
             $data = $data->except($except);
         }
 
-        if ($replace = $this->replace()){
+        if ($replace = $this->replace()) {
             $data = $data->replace($replace);
         }
 

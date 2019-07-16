@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace sidigi\LaravelApiImport;
@@ -25,7 +26,7 @@ class EloquentDataMapper
 
     private function fillModel(): void
     {
-        foreach($this->fields as $key => $field){
+        foreach ($this->fields as $key => $field) {
             $this->entity->{$key} = $field;
         }
     }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace sidigi\LaravelApiImport;
@@ -65,32 +66,31 @@ class Import
     {
         DB::beginTransaction();
 
-            do {
-                $this->makeRequest();
+        do {
+            $this->makeRequest();
 
-                $response = $this->getParsedResponse();
+            $response = $this->getParsedResponse();
 
-                $items = $this->getItemsFromResponseByKey($response, $this->itemsKey);
+            $items = $this->getItemsFromResponseByKey($response, $this->itemsKey);
 
-                foreach ($this->pageCallbacks as $callback){
-                    if (is_callable($callback)){
-                        $callback($this->getResponse());
-                    }
+            foreach ($this->pageCallbacks as $callback) {
+                if (is_callable($callback)) {
+                    $callback($this->getResponse());
                 }
+            }
 
-                foreach ($this->eachCallbacks as $callback){
-                    if (is_callable($callback)){
-                        collect($items)->each(static function ($item) use ($callback) {
-                            $callback($item);
-                        });
-                    }
+            foreach ($this->eachCallbacks as $callback) {
+                if (is_callable($callback)) {
+                    collect($items)->each(static function ($item) use ($callback) {
+                        $callback($item);
+                    });
                 }
+            }
 
-                if ($this->sleep){
-                    sleep($this->sleep);
-                }
-
-            } while ( $this->hasNextPage() );
+            if ($this->sleep) {
+                sleep($this->sleep);
+            }
+        } while ($this->hasNextPage());
 
         DB::commit();
     }
@@ -111,21 +111,22 @@ class Import
 
     public function makeRequest(): void
     {
-        if (is_callable($this->requestCallback)){
+        if (is_callable($this->requestCallback)) {
             $this->response = call_user_func($this->requestCallback, $this->client);
+
             return;
         }
 
         $this->response = $this->client->get($this->pager->url(), $this->headers);
 
-        if ($this->pager->hasNextPage()){
+        if ($this->pager->hasNextPage()) {
             $this->pager->next();
         }
     }
 
     public function getParsedResponse(): ?array
     {
-        return json_decode((string)$this->getResponse()->getBody(), true);
+        return json_decode((string) $this->getResponse()->getBody(), true);
     }
 
     public function getResponse(): Response
@@ -135,9 +136,9 @@ class Import
 
     public function getItemsFromResponseByKey(array $response, ?string $key)
     {
-        if (count($response) !== count($response, COUNT_RECURSIVE)){
+        if (count($response) !== count($response, COUNT_RECURSIVE)) {
             return $response[$key] ?? $response;
-        };
+        }
 
         return [$response];
     }
