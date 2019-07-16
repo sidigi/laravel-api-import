@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace sidigi\LaravelApiImport;
@@ -15,13 +16,13 @@ class ImportModel extends ImportEntity
 
     public function fire(): void
     {
-        if ($this->needTruncate()){
+        if ($this->needTruncate()) {
             $this->model::truncate();
         }
 
         parent::fire();
 
-        if ($this->needDeleteRecordsNotInResponse()){
+        if ($this->needDeleteRecordsNotInResponse()) {
             $this->model::destroy($this->allowedIds);
         }
     }
@@ -29,13 +30,13 @@ class ImportModel extends ImportEntity
     private function getFilled(array $fields): Model
     {
         /** @var Model $model */
-        $model = new $this->model;
+        $model = new $this->model();
 
-        if ( ! $this->exists){
+        if (!$this->exists) {
             return $this->fill($model, $fields);
         }
 
-        foreach ( (array) $this->exists as $key){
+        foreach ((array) $this->exists as $key) {
             $where[$key] = $fields[$key];
         }
 
@@ -43,38 +44,37 @@ class ImportModel extends ImportEntity
         $model
             ->newQuery()
             ->where($where ?? [])
-            ->first() ?? $model
-        , $fields);
+            ->first() ?? $model, $fields);
     }
 
     protected function eachRegister(): void
     {
-        $this->each(function ($item){
+        $this->each(function ($item) {
             $result = null;
 
-            if ($this->mapper){
+            if ($this->mapper) {
                 $item = (new $this->mapper($item))->get();
             }
 
             $result = $this->eachItem($item);
 
-            if ($result === false){
+            if ($result === false) {
                 return;
-            };
+            }
 
-            if (is_array($result)){
+            if (is_array($result)) {
                 $item = $result;
             }
 
             $model = $this->getFilled($item);
 
-            if ($this->saving($model, $item) === false){
+            if ($this->saving($model, $item) === false) {
                 return;
             }
 
             $model->save();
 
-            if ($this->needDeleteRecordsNotInResponse()){
+            if ($this->needDeleteRecordsNotInResponse()) {
                 $this->allowedIds[] = $model->{$model->getKeyName()};
             }
         });
@@ -82,7 +82,6 @@ class ImportModel extends ImportEntity
 
     protected function saving(Model $model, array $item)
     {
-
     }
 
     private function fill(Model $model, array $fields): Model

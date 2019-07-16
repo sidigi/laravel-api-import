@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace sidigi\LaravelApiImport\Formatters;
@@ -33,7 +34,7 @@ class ArrayKeysFormatter implements ModificatorInterface
 
         $input = $this->data;
 
-        $placeholder = new stdClass;
+        $placeholder = new stdClass();
 
         foreach (is_array($keys) ? $keys : func_get_args() as $key) {
             $value = data_get($input, $key, $placeholder);
@@ -53,9 +54,9 @@ class ArrayKeysFormatter implements ModificatorInterface
 
         $data = Arr::dot($this->data);
 
-        foreach (array_reverse($keys) as $key => $value){
-            foreach ($this->getReplacedKeys($key, $keys, $data) as $oldVal => $newVal){
-                $data = json_decode(str_replace('"' . $oldVal . '":', '"' . $newVal . '":', json_encode($data)), true);
+        foreach (array_reverse($keys) as $key => $value) {
+            foreach ($this->getReplacedKeys($key, $keys, $data) as $oldVal => $newVal) {
+                $data = json_decode(str_replace('"'.$oldVal.'":', '"'.$newVal.'":', json_encode($data)), true);
             }
         }
 
@@ -74,19 +75,19 @@ class ArrayKeysFormatter implements ModificatorInterface
 
     private function getReplacedKeys(string $key, array $keys, array &$data): array
     {
-        if (!isset($keys[$key])){
+        if (!isset($keys[$key])) {
             return [];
         }
 
-        if (Str::contains($key, '.')){
+        if (Str::contains($key, '.')) {
             $tmp = explode('.', $key);
             array_pop($tmp);
-            $newKeys[$key] = implode('.', $tmp) . '.' . $keys[$key];
-        }else{
+            $newKeys[$key] = implode('.', $tmp).'.'.$keys[$key];
+        } else {
             $newKeys[$key] = $keys[$key];
         }
 
-        if (! is_array(Arr::get($this->data, $key))){
+        if (!is_array(Arr::get($this->data, $key))) {
             return $newKeys;
         }
 
@@ -101,7 +102,7 @@ class ArrayKeysFormatter implements ModificatorInterface
             array_filter(array_keys(Arr::dot($data)), static function ($item) use ($key) {
                 return preg_match("/^$key(.*)/i", $item) > 0;
             }),
-            static function ($result, $item) use($key, $keys) {
+            static function ($result, $item) use ($key, $keys) {
                 $from = '/'.preg_quote($key, '/').'/';
                 $result[$item] = preg_replace($from, $keys[$key], $item, 1);
 

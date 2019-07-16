@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace sidigi\LaravelApiImport;
@@ -18,7 +19,7 @@ class ImportEntity extends Import
             return $this->request($client);
         };*/
 
-        if ($url = $this->url()){
+        if ($url = $this->url()) {
             $this->pager->setUrl($url);
         }
     }
@@ -33,15 +34,15 @@ class ImportEntity extends Import
 
     protected function pageRegister(): void
     {
-        $this->page(function(){
+        $this->page(function () {
             $this->eachPage($this->getResponse());
         });
     }
 
     protected function eachRegister(): void
     {
-        $this->each(function ($item){
-            if ($this->mapper){
+        $this->each(function ($item) {
+            if ($this->mapper) {
                 $item = (new $this->mapper($item))->get();
             }
 
@@ -61,15 +62,14 @@ class ImportEntity extends Import
 
     /**
      * @param array $item
-     * @return array|null|boolean
+     *
+     * @return array|null|bool
      */
     protected function eachItem(array $item)
     {
-
     }
 
     protected function eachPage(Response $response): void
     {
-
     }
 }
